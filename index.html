@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>يومية مجوهرات البنا</title>
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    :root {
+      --bg: #0b1220;
+      --bg-soft: #111a2b;
+      --panel: #0f172a;
+      --border: #223;
+      --text: #ffffff;
+      --muted: #9ca3af;
+      --accent: #2563eb;
+      --accent-2: #3b82f6;
+      --badge: #0e1627;
+    }
+    [data-theme="light"] {
+      --bg: #f5f7fb;
+      --bg-soft: #ffffff;
+      --panel: #f8fafc;
+      --border: #e5e7eb;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #2563eb;
+      --accent-2: #3b82f6;
+      --badge: #eef2ff;
+    }
+
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Naskh Arabic', 'Noto Sans Arabic', Tahoma, Arial; }
+    body { margin: 0; background:var(--bg); color:var(--text); }
+
+    /* Top Nav (horizontal only) */
+    .topnav {
+      position: sticky; top: 0; z-index: 60;
+      display: flex; align-items: center; gap: 6px; padding: 8px;
+      background: var(--bg-soft); border-bottom: 1px solid var(--border);
+      overflow-x: auto; overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      backdrop-filter: blur(6px);
+    }
+    .topnav .title { font-weight:700; white-space:nowrap; margin-inline-end: 8px; }
+    .nav-btn {
+      flex: 0 0 auto; white-space: nowrap;
+      padding: 8px 10px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--badge); color: var(--text);
+      cursor: pointer; font-weight: 600; font-size: 14px;
+    }
+    .nav-btn.active { border-color: var(--accent-2); outline: 2px solid var(--accent-2); }
+    .spacer { flex: 1; }
+
+    /* Header utilities row */
+    .util-bar { display:flex; gap:6px; flex-wrap:wrap; padding: 8px; }
+    .btn { appearance:none; border:none; border-radius:10px; padding:8px 10px; cursor:pointer; background:var(--accent); color:#fff; font-weight:600; }
+    .btn.secondary { background:#1f2937; color:#fff; }
+    [data-theme="light"] .btn.secondary { background:#e2e8f0; color:#0f172a; }
+    .btn.warn { background:#b91c1c; }
+
+    main { padding: 8px 10px 24px; max-width: 1000px; margin: 0 auto; }
+    .card { background:var(--bg-soft); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px; }
+    .grid { display:grid; grid-template-columns: 1fr; gap:10px; } /* stacked by default for mobile */
+    @media (min-width: 720px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+    label { font-size:13px; color:#6b8cff; display:block; margin-bottom:6px; }
+    input, select, textarea { width:100%; padding:10px; background:var(--badge); color:var(--text); border:1px solid var(--border); border-radius:10px; }
+    input:focus, select:focus, textarea:focus { outline:2px solid var(--accent-2); border-color:var(--accent-2); }
+    .muted { color:var(--muted); font-size:12px; }
+    .pill { display:inline-block; padding:4px 8px; background:var(--badge); border:1px solid var(--border); border-radius:999px; font-size:12px; }
+
+    .kpi-grid { display:grid; grid-template-columns: 1fr; gap:10px; }
+    @media (min-width: 720px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+    .kpi { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px; }
+    .kpi h3 { margin:0 0 6px 0; font-size:14px; color:#93c5fd; }
+    .kpi p { margin:0; font-size:20px; font-weight:800; }
+
+    .success { color:#34d399; font-weight:700; }
+    .danger { color:#b91c1c; font-weight:700; }
+
+    /* Log cards */
+    .op-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px; }
+    .op-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+    .badge { display:inline-block; padding:4px 8px; border:1px solid var(--border); border-radius:999px; font-size:12px; background:var(--badge); }
+    .op-grid { display:grid; grid-template-columns: 1fr; gap:6px; }
+    @media (min-width: 720px) { .op-grid { grid-template-columns: 1fr 1fr; } }
+    .op-row { display:flex; justify-content:space-between; gap:8px; }
+    .label { color:#93c5fd; font-size:12px; }
+    .val { font-weight:700; }
+    .op-actions { display:flex; gap:6px; margin-top:8px; }
+    .toggle { background:transparent; border:1px dashed var(--border); color:var(--text); padding:6px 10px; border-radius:10px; cursor:pointer; }
+  </style>
+</head>
+<body>
+<div id="loginPage" class="card" style="max-width:420px; margin: 80px auto;">
+  <h2 style="margin-top:0; text-align:center; color:#6b8cff;">🔒 تسجيل الدخول</h2>
+  <input type="password" id="loginPass" placeholder="ادخل كلمة المرور" />
+  <button class="btn" style="width:100%; margin-top:10px;" onclick="doLogin()">دخول</button>
+  <div id="loginError" class="danger" style="display:none; text-align:center; margin-top:8px;">كلمة المرور غير صحيحة</div>
+</div>
+
+<div id="app" style="display:none;">
+  <nav class="topnav">
+    <div class="title">📒 مجوهرات البنا</div>
+    <button class="nav-btn active" data-view="new">عملية جديدة</button>
+    <button class="nav-btn" data-view="log">سجل العمليات</button>
+    <button class="nav-btn" data-view="inbound">وارد جديد</button>
+    <button class="nav-btn" data-view="payout">توريد</button>
+    <button class="nav-btn" data-view="overview">نظرة عامة</button>
+    <div class="spacer"></div>
+    <button id="themeToggle" class="nav-btn">فاتح/داكن</button>
+    <button id="logout" class="nav-btn">خروج</button>
+  </nav>
+
+  <main>
+    <div class="util-bar">
+      <button id="exportCsv" class="btn secondary">تصدير CSV</button>
+      <button id="exportJson" class="btn secondary">تصدير JSON</button>
+    </div>
+
+    <!-- شاشة: عملية جديدة -->
+    <section id="view-new" class="view card">
+      <h2 style="margin:0 0 8px 0;">إدخال عملية جديدة</h2>
+      <div class="grid">
+        <div><label>التاريخ</label><input type="date" id="date" value="2025-09-27" /></div>
+        <div><label>العملية</label><select id="operation"><option value="بيع">بيع</option><option value="شراء">شراء</option></select></div>
+        <div><label>اسم العميل</label><input id="customer" placeholder="مثلاً: أ/محمد" /></div>
+        <div><label>العيار</label><select id="karat"><option>24</option><option>22</option><option selected>21</option><option>18</option><option>14</option></select></div>
+        <div><label>نوع المشغولات</label><input id="itemType" placeholder="خاتم / حلق / سلاسل ..." /></div>
+        <div><label>سعر الجرام (سوق)</label><input id="gramPrice" type="number" step="0.01" placeholder="مثلاً 300" /></div>
+        <div><label>الوزن (جرام)</label><input id="weight" type="number" step="0.01" placeholder="مثلاً 5.3" /></div>
+        <div><label>الأجر (للجرام)</label><input id="wage" type="number" step="0.01" placeholder="مثلاً 10" /></div>
+        <div><label>إجمالي المبلغ (يدوي)</label><input id="totalAmount" type="number" step="0.01" placeholder="المبلغ المستلم/المدفوع" /></div>
+        <div><label>ملاحظات</label><input id="notes" placeholder="تفاصيل إضافية" /></div>
+      </div>
+      <div class="muted" style="margin-top:8px;">
+        المصنعية/جم = (<b>إجمالي المبلغ ÷ الوزن</b>) − <b>سعر الجرام</b> —
+        صافي الربح = IF(العملية='بيع', الوزن × (المصنعية − الأجر), (سعر الجرام − (إجمالي المبلغ ÷ الوزن)) × الوزن)
+      </div>
+      <div class="op-actions" style="margin-top:8px;">
+        <button id="calcBtn" class="btn">حساب القيم</button>
+        <button id="saveBtn" class="btn">حفظ العملية</button>
+        <button id="resetBtn" class="btn secondary">تفريغ الحقول</button>
+      </div>
+      <div id="results" style="margin-top:8px; display:none;">
+        <div class="row" style="display:flex; gap:6px; flex-wrap:wrap;">
+          <div class="pill">المصنعية/جم: <span id="makingPerGram">0</span></div>
+          <div class="pill">الربح/جم: <span id="profitPerGram" class="success">0</span></div>
+          <div class="pill">الربح الكلي: <span id="profitTotal" class="success">0</span></div>
+          <div class="pill">متوسط السعر/جم: <span id="avgPerGram">0</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- شاشة: سجل العمليات -->
+    <section id="view-log" class="view card" style="display:none;">
+      <h2 style="margin:0 0 8px 0;">سجل العمليات</h2>
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:8px;">
+        <div><label class="muted">التاريخ من</label><input type="date" id="fromDateLog"></div>
+        <div><label class="muted">إلى</label><input type="date" id="toDateLog"></div>
+        <div style="grid-column:1/-1;"><label class="muted">بحث</label><input id="searchLog" placeholder="اسم العميل/النوع/الملاحظات"></div>
+      </div>
+      <div id="logCards" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;"></div>
+    </section>
+
+    <!-- شاشة: وارد جديد -->
+    <section id="view-inbound" class="view card" style="display:none;">
+      <h2 style="margin:0 0 8px 0;">وارد جديد</h2>
+      <div class="grid">
+        <div><label>التاريخ</label><input type="date" id="inDate" value="2025-09-27"/></div>
+        <div><label>العيار</label><select id="inKarat"><option>24</option><option>22</option><option selected>21</option><option>18</option><option>14</option></select></div>
+        <div><label>الوزن (جرام)</label><input id="inWeight" type="number" step="0.01" placeholder="مثلاً 10.5"/></div>
+        <div><label>الأجر (للجرام)</label><input id="inWage" type="number" step="0.01" placeholder="مثلاً 8"/></div>
+      </div>
+      <div class="op-actions" style="margin-top:8px;"><button id="saveInbound" class="btn">حفظ الوارد</button></div>
+      <div id="inboundCards" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;"></div>
+    </section>
+
+    <!-- شاشة: توريد -->
+    <section id="view-payout" class="view card" style="display:none;">
+      <h2 style="margin:0 0 8px 0;">توريد</h2>
+      <div class="grid">
+        <div><label>التاريخ</label><input type="date" id="poDate" value="2025-09-27"/></div>
+        <div><label>الوزن (جرام)</label><input id="poWeight" type="number" step="0.01" placeholder="مثلاً 12"/></div>
+        <div><label>المبلغ</label><input id="poAmount" type="number" step="0.01" placeholder="مثلاً 5000"/></div>
+      </div>
+      <div class="op-actions" style="margin-top:8px;"><button id="savePayout" class="btn">حفظ التوريد</button></div>
+      <div id="payoutCards" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;"></div>
+    </section>
+
+    <!-- شاشة: نظرة عامة (آخر واحدة) -->
+    <section id="view-overview" class="view card" style="display:none;">
+      <h2 style="margin:0 0 8px 0;">نظرة عامة</h2>
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:8px;">
+        <div><label class="muted">التاريخ من</label><input type="date" id="fromDateOV"></div>
+        <div><label class="muted">إلى</label><input type="date" id="toDateOV"></div>
+      </div>
+      <div class="op-actions" style="margin-top:8px;">
+        <button id="filterOVBtn" class="btn secondary">تطبيق المدة</button>
+        <button id="clearOVBtn" class="btn secondary">مسح</button>
+      </div>
+      <div class="kpi-grid" id="kpis" style="margin-top:8px;"></div>
+
+      <div class="card" style="margin-top:10px;">
+        <h3 style="margin:0 0 6px 0; color:#93c5fd;">تفصيل وزن المباع حسب العيار (بيع)</h3>
+        <table id="karatSalesTable" style="width:100%; border-collapse:collapse;">
+          <thead><tr><th>العيار</th><th>إجمالي الوزن المباع</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h3 style="margin:0 0 6px 0; color:#93c5fd;">الوارد حسب العيار</h3>
+        <table id="karatInboundTable" style="width:100%; border-collapse:collapse;">
+          <thead><tr><th>العيار</th><th>إجمالي الوزن (وارد)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h3 style="margin:0 0 6px 0; color:#93c5fd;">أكثر الأنواع تكرارًا (بيع)</h3>
+        <table id="topItemsTable" style="width:100%; border-collapse:collapse;">
+          <thead><tr><th>نوع المشغول</th><th>عدد العمليات</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // ===== Login =====
+  function doLogin() {
+    const pass = document.getElementById("loginPass").value.trim();
+    if (pass === "7553647") {
+      document.getElementById("loginPage").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      localStorage.setItem("goldAppLoggedIn","1");
+    } else {
+      document.getElementById("loginError").style.display = "block";
+    }
+  }
+  if (localStorage.getItem("goldAppLoggedIn") === "1") {
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("app").style.display = "block";
+  }
+
+  // Theme toggle
+  const savedTheme = localStorage.getItem("goldTheme") || "dark";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme");
+    const next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("goldTheme", next);
+  });
+  document.getElementById("logout").addEventListener("click", () => { localStorage.removeItem("goldAppLoggedIn"); location.reload(); });
+
+  // ===== Utilities =====
+  const $ = (id) => document.getElementById(id);
+  const toNum = (v) => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+  const views = {"new":"view-new", "log":"view-log", "inbound":"view-inbound", "payout":"view-payout", "overview":"view-overview"};
+  function navTo(viewKey) {
+    document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".nav-btn[data-view='"+viewKey+"']").forEach(btn => btn.classList.add("active"));
+    document.querySelectorAll(".view").forEach(v => v.style.display = "none");
+    $(views[viewKey]).style.display = "block";
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+  document.querySelectorAll(".nav-btn[data-view]").forEach(btn => btn.addEventListener("click", () => navTo(btn.dataset.view)));
+
+  // ===== Storage =====
+  function load(name) { try { return JSON.parse(localStorage.getItem(name) || "[]"); } catch { return []; } }
+  function save(name, rows) { localStorage.setItem(name, JSON.stringify(rows)); }
+
+  // ===== New Operation =====
+  function computeValues() {
+    const total = toNum($("totalAmount").value);
+    const weight = toNum($("weight").value);
+    const gramPrice = toNum($("gramPrice").value);
+    const wage = toNum($("wage").value);
+    if (weight <= 0 || total <= 0) return null;
+    const avgPerGram = total / weight;
+    const makingPerGram = avgPerGram - gramPrice;
+    const op = $("operation").value;
+    let profitTotal = 0;
+    if (op === "بيع") { profitTotal = weight * (makingPerGram - wage); }
+    else { profitTotal = (gramPrice - avgPerGram) * weight; }
+    const profitPerGram = profitTotal / weight;
+    return {
+      avgPerGram: +(avgPerGram.toFixed(2)),
+      makingPerGram: +(makingPerGram.toFixed(2)),
+      profitPerGram: +(profitPerGram.toFixed(2)),
+      profitTotal: +(profitTotal.toFixed(2))
+    };
+  }
+  $("calcBtn").addEventListener("click", () => {
+    const res = computeValues();
+    if (!res) { $("results").style.display="none"; return; }
+    $("results").style.display="block";
+    $("avgPerGram").textContent = res.avgPerGram;
+    $("makingPerGram").textContent = res.makingPerGram;
+    $("profitPerGram").textContent = res.profitPerGram;
+    $("profitTotal").textContent = res.profitTotal;
+  });
+  $("saveBtn").addEventListener("click", () => {
+    const res = computeValues();
+    const row = {
+      date: $("date").value, operation: $("operation").value,
+      customer: $("customer").value.trim(), karat: $("karat").value,
+      itemType: $("itemType").value.trim(), gramPrice: toNum($("gramPrice").value),
+      weight: toNum($("weight").value), wage: toNum($("wage").value),
+      totalAmount: toNum($("totalAmount").value), notes: $("notes").value.trim(),
+      avgPerGram: res ? res.avgPerGram : 0, makingPerGram: res ? res.makingPerGram : 0,
+      profitPerGram: res ? res.profitPerGram : 0, profitTotal: res ? res.profitTotal : 0,
+      createdAt: new Date().toISOString()
+    };
+    const rows = load("goldLog"); rows.unshift(row); save("goldLog", rows);
+    alert("تم حفظ العملية"); ["customer","itemType","gramPrice","weight","wage","totalAmount","notes"].forEach(id => $(id).value = ""); navTo("log"); renderLog(); renderOverview();
+  });
+  $("resetBtn").addEventListener("click", () => { ["customer","itemType","gramPrice","weight","wage","totalAmount","notes"].forEach(id => $(id).value = ""); $("karat").value="21"; $("operation").value="بيع"; $("date").value="2025-09-27"; });
+
+  // ===== Log (cards) =====
+  function getLogFiltered() {
+    const rows = load("goldLog");
+    const q = $("searchLog").value?.trim() || "";
+    const from = $("fromDateLog").value ? new Date($("fromDateLog").value) : null;
+    const to = $("toDateLog").value ? new Date($("toDateLog").value) : null;
+    return rows.filter(r => {
+      const d = r.date ? new Date(r.date) : null;
+      const inDate = (!from || (d && d >= from)) && (!to || (d && d <= to));
+      const inText = !q || (r.itemType||"").includes(q) || (r.notes||"").includes(q) || (r.customer||"").includes(q);
+      return inDate && inText;
+    });
+  }
+  function renderLog() {
+    const rows = getLogFiltered();
+    const wrap = $("logCards"); if (!wrap) return; wrap.innerHTML = "";
+    rows.forEach((r, idx) => {
+      const card = document.createElement("div"); card.className = "op-card";
+      const detailsId = "det_" + (r.createdAt || idx);
+      card.innerHTML = `
+        <div class="op-head">
+          <div>
+            <span class="badge">${r.date || ""}</span>
+            <span class="badge">${r.operation || ""}</span>
+            <span class="badge">${r.karat || ""} عيار</span>
+            <span class="badge">${r.customer || "بدون اسم"}</span>
+          </div>
+          <div class="op-actions">
+            <button class="toggle" onclick="const d=document.getElementById('${detailsId}'); d.style.display = (d.style.display==='none'?'grid':'none'); this.textContent = d.style.display==='none' ? 'عرض التفاصيل' : 'إخفاء التفاصيل';">عرض التفاصيل</button>
+            <button class="btn secondary" onclick="editRow(${idx})">تعديل</button>
+            <button class="btn warn" onclick="deleteRow(${idx})">حذف</button>
+          </div>
+        </div>
+        <div id="${detailsId}" class="op-grid" style="display:none;">
+          <div class="op-row"><span class="label">نوع:</span> <span class="val">${r.itemType || "-"}</span></div>
+          <div class="op-row"><span class="label">سعر الجرام:</span> <span class="val">${r.gramPrice || 0}</span></div>
+          <div class="op-row"><span class="label">الوزن:</span> <span class="val">${r.weight || 0}</span></div>
+          <div class="op-row"><span class="label">الأجر:</span> <span class="val">${r.wage || 0}</span></div>
+          <div class="op-row"><span class="label">المبلغ:</span> <span class="val">${r.totalAmount || 0}</span></div>
+          <div class="op-row"><span class="label">المصنعية/جم:</span> <span class="val">${r.makingPerGram || 0}</span></div>
+          <div class="op-row"><span class="label">الربح/جم:</span> <span class="val ${((r.profitPerGram||0) >= 0 ? 'success' : 'danger')}">${r.profitPerGram || 0}</span></div>
+          <div class="op-row"><span class="label">الربح الكلي:</span> <span class="val ${((r.profitTotal||0) >= 0 ? 'success' : 'danger')}">${r.profitTotal || 0}</span></div>
+          <div class="op-row"><span class="label">ملاحظات:</span> <span class="val">${r.notes || "-"}</span></div>
+        </div>`;
+      wrap.appendChild(card);
+    });
+  }
+  ["fromDateLog","toDateLog","searchLog"].forEach(id => { const el = $(id); if (el) el.addEventListener("input", renderLog); });
+  function editRow(ix) {
+    const rows = getLogFiltered();
+    const target = rows[ix];
+    const all = load("goldLog");
+    const masterIndex = all.findIndex(x => x.createdAt === target.createdAt);
+    if (masterIndex === -1) return;
+    const r = all[masterIndex];
+    $("date").value = r.date || ""; $("operation").value = r.operation || "بيع"; $("customer").value = r.customer || "";
+    $("karat").value = r.karat || "21"; $("itemType").value = r.itemType || ""; $("gramPrice").value = r.gramPrice || "";
+    $("weight").value = r.weight || ""; $("wage").value = r.wage || ""; $("totalAmount").value = r.totalAmount || ""; $("notes").value = r.notes || "";
+    all.splice(masterIndex,1); save("goldLog", all); renderLog(); navTo("new"); window.scrollTo({top:0, behavior:"smooth"});
+  }
+  function deleteRow(ix) {
+    const rows = getLogFiltered();
+    const target = rows[ix];
+    const all = load("goldLog");
+    const masterIndex = all.findIndex(x => x.createdAt === target.createdAt);
+    if (masterIndex === -1) return;
+    all.splice(masterIndex,1); save("goldLog", all); renderLog(); renderOverview();
+  }
+
+  // ===== Inbound & Payout =====
+  function renderInbound() {
+    const rows = load("inboundLog"); const wrap = $("inboundCards"); wrap.innerHTML = "";
+    rows.forEach((r, idx) => {
+      const c = document.createElement("div"); c.className = "op-card";
+      c.innerHTML = `<div class="op-head"><div><span class="badge">${r.date||""}</span> <span class="badge">${r.karat||""} عيار</span></div><div class="op-actions"><button class="btn warn" onclick="deleteInbound(${idx})">حذف</button></div></div>
+      <div class="op-grid"><div class="op-row"><span class="label">الوزن:</span> <span class="val">${r.weight||0}</span></div><div class="op-row"><span class="label">الأجر/جم:</span> <span class="val">${r.wage||0}</span></div></div>`;
+      wrap.appendChild(c);
+    });
+  }
+  function deleteInbound(ix) { const rows = load("inboundLog"); rows.splice(ix,1); save("inboundLog", rows); renderInbound(); renderOverview(); }
+  $("saveInbound").addEventListener("click", () => {
+    const row = { date: $("inDate").value, karat: $("inKarat").value, weight: toNum($("inWeight").value), wage: toNum($("inWage").value), createdAt: new Date().toISOString() };
+    const rows = load("inboundLog"); rows.unshift(row); save("inboundLog", rows);
+    alert("تم حفظ الوارد"); ["inWeight","inWage"].forEach(id => $(id).value = ""); renderInbound(); renderOverview();
+  });
+
+  function renderPayout() {
+    const rows = load("payoutLog"); const wrap = $("payoutCards"); wrap.innerHTML = "";
+    rows.forEach((r, idx) => {
+      const c = document.createElement("div"); c.className = "op-card";
+      c.innerHTML = `<div class="op-head"><div><span class="badge">${r.date||""}</span></div><div class="op-actions"><button class="btn warn" onclick="deletePayout(${idx})">حذف</button></div></div>
+      <div class="op-grid"><div class="op-row"><span class="label">الوزن:</span> <span class="val">${r.weight||0}</span></div><div class="op-row"><span class="label">المبلغ:</span> <span class="val">${r.amount||0}</span></div></div>`;
+      wrap.appendChild(c);
+    });
+  }
+  function deletePayout(ix) { const rows = load("payoutLog"); rows.splice(ix,1); save("payoutLog", rows); renderPayout(); renderOverview(); }
+  $("savePayout").addEventListener("click", () => {
+    const row = { date: $("poDate").value, weight: toNum($("poWeight").value), amount: toNum($("poAmount").value), createdAt: new Date().toISOString() };
+    const rows = load("payoutLog"); rows.unshift(row); save("payoutLog", rows);
+    alert("تم حفظ التوريد"); ["poWeight","poAmount"].forEach(id => $(id).value = ""); renderPayout(); renderOverview();
+  });
+
+  // ===== Overview =====
+  function getOVFiltered(name) {
+    const rows = load(name);
+    const from = $("fromDateOV").value ? new Date($("fromDateOV").value) : null;
+    const to = $("toDateOV").value ? new Date($("toDateOV").value) : null;
+    return rows.filter(r => { const d = r.date ? new Date(r.date) : null; return (!from || (d && d >= from)) && (!to || (d && d <= to)); });
+  }
+  function formatNum(n) { return (n || 0).toLocaleString('ar-EG', {maximumFractionDigits: 2}); }
+  function renderOverview() {
+    const ops = getOVFiltered("goldLog");
+    const inbound = getOVFiltered("inboundLog");
+    const payout = getOVFiltered("payoutLog");
+    const sales = ops.filter(r => r.operation === "بيع");
+    const buys  = ops.filter(r => r.operation === "شراء");
+    const totalSalesAmount = sales.reduce((s,r) => s + (r.totalAmount||0), 0);
+    const totalBuysAmount  = buys.reduce((s,r) => s + (r.totalAmount||0), 0);
+    const totalProfit      = ops.reduce((s,r) => s + (r.profitTotal||0), 0);
+    const avgProfitPerGram = (() => { const w = ops.reduce((s,r)=>s+(r.weight||0),0); return w>0 ? ops.reduce((s,r)=>s+(r.profitTotal||0),0)/w : 0; })();
+    const karats = ["24","22","21","18","14"];
+    const karatSales = Object.fromEntries(karats.map(k=>[k,0])); sales.forEach(r=>{ const k=String(r.karat||""); karatSales[k]=(karatSales[k]||0)+(r.weight||0); });
+    const karatInbound = Object.fromEntries(karats.map(k=>[k,0])); inbound.forEach(r=>{ const k=String(r.karat||""); karatInbound[k]=(karatInbound[k]||0)+(r.weight||0); });
+    const totalInboundWeight = inbound.reduce((s,r)=> s + (r.weight||0), 0);
+    const totalPayoutWeight = payout.reduce((s,r)=> s + (r.weight||0), 0);
+    const totalPayoutAmount = payout.reduce((s,r)=> s + (r.amount||0), 0);
+    const counts = {}; sales.forEach(r=>{ const key=(r.itemType||"غير محدد").trim()|| "غير محدد"; counts[key]=(counts[key]||0)+1; });
+    const topItems = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,15);
+    const kpis = [
+      {title:"إجمالي مبلغ المبيعات (بيع)", value: formatNum(totalSalesAmount)},
+      {title:"إجمالي مبلغ الشراء (شراء)", value: formatNum(totalBuysAmount)},
+      {title:"إجمالي صافي الربح", value: formatNum(totalProfit)},
+      {title:"متوسط الربح/جم", value: formatNum(avgProfitPerGram)},
+      {title:"عدد عمليات البيع", value: sales.length},
+      {title:"عدد عمليات الشراء", value: buys.length},
+      {title:"إجمالي الوارد (وزن)", value: formatNum(totalInboundWeight)},
+      {title:"إجمالي التوريد (وزن)", value: formatNum(totalPayoutWeight)},
+      {title:"إجمالي التوريد (مبلغ)", value: formatNum(totalPayoutAmount)}
+    ];
+    const kpiWrap = $("kpis"); kpiWrap.innerHTML = ""; kpis.forEach(k=>{ const d=document.createElement("div"); d.className="kpi"; d.innerHTML=`<h3>${k.title}</h3><p>${k.value}</p>`; kpiWrap.appendChild(d); });
+    const salesBody = document.querySelector("#karatSalesTable tbody"); salesBody.innerHTML = ""; Object.entries(karatSales).forEach(([k,v])=>{ const tr=document.createElement("tr"); tr.innerHTML = `<td>${k}</td><td>${formatNum(v)}</td>`; salesBody.appendChild(tr); });
+    const inBody = document.querySelector("#karatInboundTable tbody"); inBody.innerHTML = ""; Object.entries(karatInbound).forEach(([k,v])=>{ const tr=document.createElement("tr"); tr.innerHTML = `<td>${k}</td><td>${formatNum(v)}</td>`; inBody.appendChild(tr); });
+    const itbody = document.querySelector("#topItemsTable tbody"); itbody.innerHTML = ""; topItems.forEach(([name,count])=>{ const tr=document.createElement("tr"); tr.innerHTML=`<td>${name}</td><td>${count}</td>`; itbody.appendChild(tr); });
+  }
+  document.getElementById("filterOVBtn").addEventListener("click", renderOverview);
+  document.getElementById("clearOVBtn").addEventListener("click", () => { $("fromDateOV").value=""; $("toDateOV").value=""; renderOverview(); });
+
+  // ===== Export =====
+  function exportCSV() {
+    const ops = load("goldLog"), inbound = load("inboundLog"), payout = load("payoutLog");
+    function toCSV(headers, rows) { const lines=[headers.join(",")]; rows.forEach(r=>{ const vals=headers.map(h=> (r[h]==null? "" : String(r[h]).replaceAll('"','""'))); lines.push(vals.join(",")); }); return lines.join("\n"); }
+    const opsCSV = toCSV(["date","operation","customer","karat","itemType","gramPrice","weight","wage","totalAmount","makingPerGram","profitPerGram","profitTotal","notes","createdAt"], ops);
+    const inboundCSV = toCSV(["date","karat","weight","wage","createdAt"], inbound);
+    const payoutCSV = toCSV(["date","weight","amount","createdAt"], payout);
+    const blob = new Blob(["# عمليات\n"+opsCSV+"\n\n# وارد\n"+inboundCSV+"\n\n# توريد\n"+payoutCSV], {type:"text/plain;charset=utf-8"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download="gold-data.csv"; a.click();
+  }
+  function exportJSON() { const all={operations:load("goldLog"), inbound:load("inboundLog"), payout:load("payoutLog")}; const blob=new Blob([JSON.stringify(all,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="gold-data.json"; a.click(); }
+  document.getElementById("exportCsv").addEventListener("click", exportCSV);
+  document.getElementById("exportJson").addEventListener("click", exportJSON);
+
+  // Init
+  navTo("new"); renderLog(); renderInbound(); renderPayout(); renderOverview();
+</script>
+</body>
+</html>
